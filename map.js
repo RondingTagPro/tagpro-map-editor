@@ -774,11 +774,11 @@ $(function() {
     speculateUp: function(x,y) {
       var tile = tiles[x][y];
       var change = null;
-      if ((tile.type == portalType || tile.type == exitPortalType) && this.selectedSwitch && this.selectedSwitch.type == portalType) {
+      if ((tile.type==portalType || tile.type==redPortalType || tile.type==bluePortalType || tile.type == exitPortalType) && this.selectedSwitch && (this.selectedSwitch.type == portalType || this.selectedSwitch.type == redPortalType || this.selectedSwitch.type == bluePortalType )) {
         change = new TileState(this.selectedSwitch, {destination: tile})
         console.log('making destination action to', xy(tile));
         this.selectedSwitch = null;
-      } else if (tile.type == portalType) {
+      } else if (tile.type==portalType || tile.type==redPortalType || tile.type==bluePortalType) {
         this.selectedSwitch = tile;
         console.log('selected ', xy(this.selectedSwitch));
       } else if (tile.type == switchType) {
@@ -1380,7 +1380,8 @@ $(function() {
   var floorType, emptyType, 
     wallType, wallTopLeftType, wallTopRightType, wallBottomLeftType, wallBottomRightType,
     blueFlagType, redFlagType, switchType, bombType, onFieldType, offFieldType,
-    redFieldType, blueFieldType, portalType, redSpawnType, blueSpawnType, redSpeedpadType, blueSpeedpadType, yellowFloorType, redFloorType, blueFloorType,
+    redFieldType, blueFieldType, portalType, redPortalType, bluePortalType, exitPortalType,
+    redSpawnType, blueSpawnType, redSpeedpadType, blueSpeedpadType, yellowFloorType, redFloorType, blueFloorType,
     spikeType, powerupType, speedpadType,
     yellowFlagType, redEndzoneType, blueEndzoneType,
     redPotatoType, bluePotatoType,
@@ -1410,6 +1411,8 @@ $(function() {
     blueFieldType = new TileType('blueField', 15,3, 0,117,0, "Gate - Default Blue", {logicFn: setFieldFn('blue')}),
     portalType = new TileType('portal', 0,0, 202, 192,0, "Portal - Links to self by default; use wire tool to link portal or exit portal as destination.", {image: 'url(portal.png)', logicFn: exportPortal}),
     exitPortalType = new TileType('exitPortal', 4,0, 202, 192,0, "Exit Portal - Can be linked as destination for other portals.", {image: 'url(portal.png)', logicFn: exportExitPortal}),
+    redPortalType = new TileType('redPortal', 0, 0, 204, 51, 0, "Red Portal - Can be used by red balls.", {image: 'url(portalred.png)', logicFn: exportPortal}),
+    bluePortalType = new TileType('bluePortal', 0,0, 0, 102, 204, "Blue Portal - Can be used by blue balls.", {image: 'url(portalblue.png)', logicFn: exportPortal}),
     redFlagType = new TileType('redFlag', 14,1, 255,0,0, "Red Flag"),
     blueFlagType = new TileType('blueFlag', 15,1, 0,0,255, "Blue Flag"),
     redSpawnType = new TileType('redSpawn', 14,0, 155,0,0, "Red Spawn Tile - Red balls will spawn within a certain radius of this tile.", {logicFn: exportSpawn}),
@@ -1449,6 +1452,7 @@ $(function() {
   areOpposites(redSpawnType, blueSpawnType);
   areOpposites(redEndzoneType, blueEndzoneType);
   areOpposites(redPotatoType, bluePotatoType);
+  areOpposites(redPortalType, bluePortalType);
   areHorizontalMirrors(wallBottomLeftType, wallBottomRightType);
   areHorizontalMirrors(wallTopLeftType, wallTopRightType);
   areVerticalMirrors(wallBottomLeftType, wallTopLeftType);
@@ -1756,12 +1760,12 @@ $(function() {
   var shiftDown = false;
   var oldTitles = {};
   var toolTips = {
-   toolPencil: '1', toolBrush: '2', toolLine: '3', toolRectFill: '4', toolRectOutline: '5', toolCircleFill: '6', toolCircleOutline: '7', toolFill: '8', toolWire: '9', toolClipboard: '0',
-    0: 'q',  1: 'w',  2: 'e',  3: 'r',  4: 't',  5: 'f',
-    7: 'o',  8: 'v',  9: 'b', 10: 'j', 11: 'k', 12: 's',
-                              17: 'n', 18: 'm',
-   21: 'a', 22: 'u', 23: 'i', 24: 'g', 25: 'h',          27: 'p',
-   28: 'c', 31: 'x', 32: 'l', 33: 'd'};
+    toolPencil: '1', toolBrush: '2', toolLine: '3', toolRectFill: '4', toolRectOutline: '5', toolCircleFill: '6', toolCircleOutline: '7', toolFill: '8', toolWire: '9', toolClipboard: '0',
+     0: 'q',  1: 'w',  2: 'e',  3: 'r',  4: 't',  5: 'f',
+     7: 'o',  8: 'v',  9: 'b', 10: 'j', 11: 'k', 12: 's',
+                               17: 'n', 18: 'm',
+    19: 'a', 20: 'u', 21: 'i', 22: 'g', 23: 'h',          25: 'p',
+    26: 'c', 29: 'x', 30: 'l', 31: 'd'};
   var tipsTools = {};
   var keys = {48: '0', 49: '1', 50: '2', 51: '3', 52: '4', 53: '5', 54: '6', 55: '7', 56: '8', 57: '9', 65: 'a', 66: 'b', 67: 'c', 68: 'd', 69: 'e', 70: 'f', 71: 'g', 72: 'h', 73: 'i', 74: 'j', 75: 'k', 76: 'l', 77: 'm', 78: 'n', 79: 'o', 80: 'p', 81: 'q', 82: 'r', 83: 's', 84: 't', 85: 'u', 86: 'v', 87: 'w', 88: 'x', 89: 'y', 90: 'z'};
   for(var id in toolTips) {
@@ -1904,7 +1908,7 @@ $(function() {
           var x = $(this).data('x');
           var y = $(this).data('y');
         
-          if (tiles[x][y].type == portalType) {
+          if (tiles[x][y].type == portalType || tiles[x][y].type == redPortalType || tiles[x][y].type == bluePortalType) {
             var cooldown = (tiles[x][y].cooldown!=undefined) ? tiles[x][y].cooldown : defaultPortalCooldown;
             $('#portalCooldown').val('').attr('placeholder',cooldown);
             $('#portalAll').hide();
@@ -2065,7 +2069,7 @@ $(function() {
       for (var x=0; x<width; x++) {
         var tile = tiles[x][y];
         var cell;
-        if (tile.type == portalType) {
+        if ((tile.type==portalType || tile.type==redPortalType || tile.type==bluePortalType)) {
           cell = {
             type: tile.type.name,
             destination: tile.destination ? [tile.destination.x, tile.destination.y] : [x,y]
@@ -2191,9 +2195,10 @@ $(function() {
   var paletteRows = [
     [wallType, wallTopLeftType, wallTopRightType, wallBottomLeftType, wallBottomRightType, floorType, emptyType], 
     [yellowFlagType, redFlagType, blueFlagType, redSpawnType, blueSpawnType, spikeType, gravityWellType],
-    [potatoType, redPotatoType, bluePotatoType, redEndzoneType, blueEndzoneType, portalType, exitPortalType],
+    [potatoType, redPotatoType, bluePotatoType, redEndzoneType, blueEndzoneType, '', ''],
     [speedpadType, redSpeedpadType, blueSpeedpadType, redFloorType, blueFloorType, yellowFloorType, powerupType],
-    [onFieldType, redFieldType, blueFieldType, offFieldType, switchType, bombType, marsBallType]
+    [onFieldType, redFieldType, blueFieldType, offFieldType, switchType, bombType, marsBallType],
+    [portalType, redPortalType, bluePortalType, exitPortalType]
   ];
 
   var brushTileType = paletteRows[0][0];
@@ -2418,8 +2423,13 @@ $(function() {
               if(!json.spawnPoints) json.spawnPoints = {red: [], blue: []};
               if(!json.spawnPoints.blue) json.spawnPoints.blue = [];
               json.spawnPoints.blue.push({x: destX, y: destY});
-            } else if(type == portalType || type == exitPortalType) {
-              type = (portals[sourceX+','+sourceY]||{}).destination ? portalType : exitPortalType;
+            } else if(type == portalType || type == redPortalType || type == bluePortalType || type == exitPortalType) {
+              var hasDestination = (portals[sourceX+','+sourceY]||{}).destination;
+              if (hasDestination && type === exitPortalType) {
+                type = portalType
+              } else if (!hasDestination && type !== exitPortalType) {
+                type = exitPortalType;
+              }
             } else if (type == onFieldType || type==offFieldType || type==redFieldType || type==blueFieldType) {
               type = {on: onFieldType, off: offFieldType, red: redFieldType, blue: blueFieldType
               }[(fields[sourceX+','+sourceY]||{}).defaultState] || offFieldType;
@@ -2451,7 +2461,7 @@ $(function() {
         xy[0] = parseInt(xy[0])+deltaX;
         xy[1] = parseInt(xy[1])+deltaY;
         var tile = (tiles[xy[0]]||[])[xy[1]];
-        if (tile && tile.type==portalType) {
+        if (tile && (tile.type==portalType || tile.type==redPortalType || tile.type==bluePortalType)) {
           var dest = portals[key].destination||{};
           tile.destination = (tiles[dest.x]||[])[dest.y];
           tile.cooldown = (portals[key].cooldown!=undefined) ? portals[key].cooldown : undefined;
